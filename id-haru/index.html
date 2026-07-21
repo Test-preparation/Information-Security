@@ -610,7 +610,7 @@ $$\hat m = c_2 \cdot (c_1^x)^{-1} \pmod p$$
 <div class="diagram"><pre class="mermaid">sequenceDiagram
   participant B as ボブ（受信者）
   participant A as アリス（送信者）
-  Note over B: 鍵生成：xをランダムに選び $$y=g^x \bmod p$$
+  Note over B: 鍵生成：xをランダムに選び $$y=g^x \mod p$$
   B-&gt;&gt;A: 公開鍵 $$(p,g,y)$$
   Note over A: 暗号化：rをランダムに選ぶ&lt;br/&gt;$$c_1=g^r,\ c_2=m\cdot y^r$$
   A-&gt;&gt;B: 暗号文 $$(c_1,c_2)$$
@@ -1071,7 +1071,7 @@ $$H(S \mid W_{i_1},\dots,W_{i_{k-1}}) = H(S)$$
   participant U2 as U2 (S2,R2)
   participant U3 as U3 (S3,R3)
   rect rgb(240,240,240)
-  Note over U1,U3: フェーズ1：各自 $$f_i(x)=S_i+R_ix$$ のシェアを作り配布
+  Note over U1,U3: フェーズ1：各自 fi(x)=Si+Rix のシェアを作り配布
   U1--&gt;&gt;U2: $$W_{12}=f_1(2)$$
   U1--&gt;&gt;U3: $$W_{13}=f_1(3)$$
   U2--&gt;&gt;U1: $$W_{21}=f_2(1)$$
@@ -1080,7 +1080,7 @@ $$H(S \mid W_{i_1},\dots,W_{i_{k-1}}) = H(S)$$
   U3--&gt;&gt;U2: $$W_{32}=f_3(2)$$
   end
   rect rgb(230,245,255)
-  Note over U1,U3: フェーズ2：各自 $$W_j=W_{1j}+W_{2j}+W_{3j}$$ を計算し交換
+  Note over U1,U3: フェーズ2：各自 Wj=W1j+W2j+W3j を計算し交換
   U1--&gt;&gt;U2: $$W_1$$
   U1--&gt;&gt;U3: $$W_1$$
   U2--&gt;&gt;U1: $$W_2$$
@@ -1088,8 +1088,7 @@ $$H(S \mid W_{i_1},\dots,W_{i_{k-1}}) = H(S)$$
   U3--&gt;&gt;U1: $$W_3$$
   U3--&gt;&gt;U2: $$W_3$$
   end
-  Note over U1,U3: 各自が $$3W_1+2W_2+W_3$$（Lagrange補間）を計算
-  Note over U1,U3: → $$S=S_1+S_2+S_3$$
+  Note over U2: 各自が $$3W_1+2W_2+W_3$$（Lagrange補間）を計算すると、S=S1+S2+S3が求まる
 </pre></div><p class="cap">フェーズ1で各自の1次多項式のシェアを配り合い、フェーズ2でシェアの和Wjを交換する。最後に各自が同じLagrange補間を計算すれば、個々のSiを開示せずに和Sだけが求まる。</p>
 <p><strong>なぜこれで和が計算できるのか</strong>：$f(x)=f_1(x)+f_2(x)+f_3(x)$ とおくと、$W_j = \sum_i W_{ij} = \sum_i f_i(j) = f(j)$ である。そして $f(0)=\sum_i f_i(0)=\sum_i S_i = S$。つまり、<strong>個々のシェアの和 $W_j$ は、「和の多項式 $f$」における値 $f(j)$ に一致しており</strong>、$f$ の切片が求めたい和 $S$ になっている。ステップ3の $3W_1+2W_2+W_3$ は、$(1,W_1),(2,W_2),(3,W_3)$ からLagrange補間で $f(0)$ を求める式（3.2節の計算例と全く同じ手順）である。</p>
 <div class="supp"><span class="label">補足</span>各ユーザが受け取るシェア（例えば $\mathcal{U}_1$ にとっての $W_{21},W_{31}$）は、$(2,3)$閾値法において1個しかないシェアなので、それ単体からは元のデータ $S_2,S_3$ の情報は一切漏れない（第3章 定理2）。一見余分に見える $W_2,W_3$（他ユーザが計算した和）も、実は $\mathcal{U}_1$ が自力で計算できてしまう値（$f(x)$ が1次式であることと、既知の2点 $(1,W_1),(0,S)$ から一意に定まる）なので、新たな情報にはならない。<strong>この「自力で計算できるものは新情報ではない」という論法は、暗号理論で頻出する。</strong>
@@ -6079,9 +6078,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function setupMermaid() {
     if (!window.mermaid) return;
-    // forceLegacyMathML: OS・ブラウザのMathML実装差による表示崩れを避け、KaTeXのCSSで統一して描画する
+    // legacyMathML系フラグは付けても外してもMermaid(v10.9.6)の出力はMathML直書きのまま変わらなかった。
+    // 素の \bmod だけがそのMathML出力で中身が空になる実バグがあるため、図側で \mod に置き換えて回避している。
     mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { htmlLabels: true },
-                          securityLevel: 'loose', legacyMathML: true, forceLegacyMathML: true });
+                          securityLevel: 'loose' });
   }
 
   buildToc();
