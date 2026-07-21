@@ -1070,8 +1070,8 @@ $$H(S \mid W_{i_1},\dots,W_{i_{k-1}}) = H(S)$$
   participant U1 as U1 (S1,R1)
   participant U2 as U2 (S2,R2)
   participant U3 as U3 (S3,R3)
+  Note right of U1: フェーズ1：各自 fi(x)=Si+Rix のシェアを作り配布
   rect rgb(240,240,240)
-  Note over U1,U3: フェーズ1：各自 fi(x)=Si+Rix のシェアを作り配布
   U1--&gt;&gt;U2: $$W_{12}=f_1(2)$$
   U1--&gt;&gt;U3: $$W_{13}=f_1(3)$$
   U2--&gt;&gt;U1: $$W_{21}=f_2(1)$$
@@ -1079,8 +1079,8 @@ $$H(S \mid W_{i_1},\dots,W_{i_{k-1}}) = H(S)$$
   U3--&gt;&gt;U1: $$W_{31}=f_3(1)$$
   U3--&gt;&gt;U2: $$W_{32}=f_3(2)$$
   end
+  Note right of U1: フェーズ2：各自 Wj=W1j+W2j+W3j を計算し交換
   rect rgb(230,245,255)
-  Note over U1,U3: フェーズ2：各自 Wj=W1j+W2j+W3j を計算し交換
   U1--&gt;&gt;U2: $$W_1$$
   U1--&gt;&gt;U3: $$W_1$$
   U2--&gt;&gt;U1: $$W_2$$
@@ -1207,14 +1207,14 @@ $$H(S \mid W_{i_1},\dots,W_{i_{k-1}}) = H(S)$$
   participant P2 as P2
   participant P3 as P3
   participant P4 as P4
+  Note right of P1: ステップ(i)：代表者が3人の副官へ送信
   rect rgb(240,240,240)
-  Note over P1,P4: ステップ(i)：代表者が3人の副官へ送信
   P1-&gt;&gt;P2: $$\Pi_{1\to2}$$
   P1-&gt;&gt;P3: $$\Pi_{1\to3}$$
   P1-&gt;&gt;P4: $$\Pi_{1\to4}$$
   end
+  Note right of P2: ステップ(ii)：副官どうしが受け取った値を中継
   rect rgb(230,245,255)
-  Note over P2,P4: ステップ(ii)：副官どうしが受け取った値を中継
   P2-&gt;&gt;P3: $$\Pi_{2\to3}=\Pi_{1\to2}$$
   P2-&gt;&gt;P4: $$\Pi_{2\to4}=\Pi_{1\to2}$$
   P3-&gt;&gt;P2: $$\Pi_{3\to2}=\Pi_{1\to3}$$
@@ -1222,7 +1222,7 @@ $$H(S \mid W_{i_1},\dots,W_{i_{k-1}}) = H(S)$$
   P4-&gt;&gt;P2: $$\Pi_{4\to2}=\Pi_{1\to4}$$
   P4-&gt;&gt;P3: $$\Pi_{4\to3}=\Pi_{1\to4}$$
   end
-  Note over P2,P4: ステップ(iii)：各副官が受け取った3値の多数決を出力
+  Note right of P3: ステップ(iii)：各副官が受け取った3値の多数決を出力
 </pre></div><p class="cap">代表者P1が3人の副官へブロードキャストし（i）、副官どうしが受け取った値を相互に中継する（ii）。各副官は代表者から直接受け取った1値＋中継された2値、計3値の多数決を出力する（iii）。</p>
 <p><strong>構造の要点</strong>：各副官 $\mathcal{P}_i$ は、代表者から直接受け取った値（1つ）と、他の2人の副官から中継された値（2つ）——合計3つの値を手にし、その多数決を出力とする。これにより、代表者1人だけが不正であっても、2人の（正直な）副官からの中継が多数派を作り、正しい値に合意できる。逆に、代表者に加えてもう1人不正者がいると（合計2人、$n=4$ に対して $f=2\ge n/3$）、多数決が割れて合意性が崩れうる。</p>
 <hr />
@@ -6076,10 +6076,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // 素の \bmod はKaTeX出力で中身が空になる実バグがあるため、図側で \mod に置き換えて回避している。
+  //
+  // 既知の未解決の癖：1ページに複数の図があるとき、幅広の「Note over A,D」（複数参加者にまたがる
+  // ノート）に直後のメッセージのラベルが軽く重なることがある（Mermaid v10.9.6の癖。矢印自体は
+  // 消えず読める範囲）。iframeで図ごとに新規にMermaidを読み込んで「常に最初の描画」として扱う
+  // 回避策も試したが、複数図を連続処理すると逆に一部の図の文字列が丸ごと欠落する再現性の高い
+  // 別の不具合が出たため、実害の少ないこちらの標準的なstartOnLoad方式に戻した。
   function setupMermaid() {
     if (!window.mermaid) return;
-    // legacyMathML系フラグは付けても外してもMermaid(v10.9.6)の出力はMathML直書きのまま変わらなかった。
-    // 素の \bmod だけがそのMathML出力で中身が空になる実バグがあるため、図側で \mod に置き換えて回避している。
     mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { htmlLabels: true },
                           securityLevel: 'loose' });
   }

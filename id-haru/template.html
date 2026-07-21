@@ -580,10 +580,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // 素の \bmod はKaTeX出力で中身が空になる実バグがあるため、図側で \mod に置き換えて回避している。
+  //
+  // 既知の未解決の癖：1ページに複数の図があるとき、幅広の「Note over A,D」（複数参加者にまたがる
+  // ノート）に直後のメッセージのラベルが軽く重なることがある（Mermaid v10.9.6の癖。矢印自体は
+  // 消えず読める範囲）。iframeで図ごとに新規にMermaidを読み込んで「常に最初の描画」として扱う
+  // 回避策も試したが、複数図を連続処理すると逆に一部の図の文字列が丸ごと欠落する再現性の高い
+  // 別の不具合が出たため、実害の少ないこちらの標準的なstartOnLoad方式に戻した。
   function setupMermaid() {
     if (!window.mermaid) return;
-    // legacyMathML系フラグは付けても外してもMermaid(v10.9.6)の出力はMathML直書きのまま変わらなかった。
-    // 素の \bmod だけがそのMathML出力で中身が空になる実バグがあるため、図側で \mod に置き換えて回避している。
     mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { htmlLabels: true },
                           securityLevel: 'loose' });
   }
