@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{SUBJECT}} — 試験対策参考書</title>
+
+<!-- Q8=mathjax-online のときのみ出力する。
+     設定(svg)と読み込むファイル(tex-svg.js)を必ず一致させること。
+     Q8=katex-local のときは assets/katex/ を参照する <link>/<script> に差し替える。
+     Q8=raw-latex のときは両方とも出力しない。 -->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  options: { enableMenu: false },
+  startup: { typeset: false }   // 起動時に全部組版しない。章ごとに遅延組版する
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+<style>
+:root {
+  --ink: #1a1a1a;
+  --ink-soft: #5c6470;
+  --accent: #1e3a5f;
+  --accent-soft: #e8edf3;
+  --alert: #a8341f;
+  --caution: #b45309;
+  --ok: #15803d;
+  --marker: #fde68a;
+  --rule: #d8dce2;
+  --paper: #ffffff;
+  --paper-tint: #f7f8fa;
+  --sans: -apple-system, "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", "Meiryo", sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+body { margin: 0; background: var(--paper); color: var(--ink);
+       font-family: var(--sans); line-height: 1.9; font-size: 16.5px; letter-spacing: .02em; }
+
+/* ===== レイアウト ===== */
+.book { display: grid; grid-template-columns: 280px minmax(0,1fr); max-width: 1200px; margin: 0 auto; }
+nav.toc { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+          border-right: 1px solid var(--rule); padding: 28px 20px 60px;
+          font-size: 13px; line-height: 1.7; background: var(--paper); }
+main { padding: 48px 56px 120px; max-width: 46em; }
+
+/* ===== 目次 ===== */
+.toc-title { font-size: 12px; letter-spacing: .12em; color: var(--ink-soft); margin: 0 0 14px; font-weight: 600; }
+.toc a { display: block; color: var(--ink); text-decoration: none; padding: 3px 0; }
+.toc a:hover { color: var(--accent); }
+.toc a.chap { font-weight: 600; margin-top: 12px; }
+.toc a.sect { padding-left: 14px; color: var(--ink-soft); font-size: 12.5px; }
+.toc a.current { color: #fff; font-weight: 700; background: var(--accent);
+                 border-radius: 3px; padding-left: 6px; padding-right: 6px; }
+#searchInput { width: 100%; padding: 7px 10px; border: 1px solid var(--rule); border-radius: 4px;
+               font-size: 13px; margin-bottom: 6px; font-family: var(--sans); }
+#searchMeta { font-size: 11px; color: var(--ink-soft); min-height: 16px; margin-bottom: 10px; }
+#tocToggle { display: none; }
+
+/* ===== 表紙 ===== */
+.cover { border-bottom: 3px solid var(--accent); padding-bottom: 28px; margin-bottom: 48px; }
+.cover .subject { font-size: 34px; font-weight: 800; margin: 0 0 8px; letter-spacing: .04em; }
+.cover .meta { color: var(--ink-soft); font-size: 14px; margin: 0; }
+.cover .countdown { display: inline-block; margin-top: 14px; padding: 5px 14px;
+                    border: 1px solid var(--alert); color: var(--alert); border-radius: 3px;
+                    font-size: 13px; font-weight: 600; }
+
+/* ===== 見出し ===== */
+h1.chapter { font-size: 27px; font-weight: 800;
+             margin: 96px 0 8px; padding-top: 28px; border-top: 1px solid var(--rule); letter-spacing: .04em; }
+h1.chapter .num { display: block; font-family: var(--sans); font-size: 12px; letter-spacing: .16em;
+                  color: var(--accent); margin-bottom: 10px; font-weight: 600; }
+h2 { font-size: 20px; font-weight: 700; margin: 56px 0 16px; color: var(--accent);
+     padding-bottom: 6px; border-bottom: 1px solid var(--rule); letter-spacing: .03em; }
+h3 { font-size: 17px; font-weight: 700; margin: 32px 0 10px; }
+p { margin: 0 0 1.5em; text-align: justify; }
+main p strong, main li strong { font-weight: 700; color: var(--accent);
+  background: linear-gradient(transparent 62%, var(--marker) 62%); }
+
+/* ===== 導入・まとめ ===== */
+.intro { background: var(--paper-tint); border-left: 3px solid var(--accent); padding: 20px 24px; margin: 24px 0 40px; }
+.intro h2, .summary h2 { margin: 0 0 12px; border: none; padding: 0; font-size: 15px; letter-spacing: .08em; }
+.intro ul, .summary ul { margin: 10px 0 0; padding-left: 20px; }
+.summary { border: 2px solid var(--accent); border-radius: 4px; padding: 20px 24px; margin: 48px 0 32px; }
+.summary h2 { color: var(--accent); }
+
+/* ===== 本文ブロック ===== */
+.def { border: 1px solid var(--accent); border-left: 4px solid var(--accent);
+       background: var(--accent-soft); padding: 14px 20px; margin: 24px 0; border-radius: 3px; }
+.def .term { font-weight: 700; margin-right: 8px; }
+.formula { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+           padding: 16px 0; margin: 28px 0; text-align: center; overflow-x: auto; }
+.formula .cap { display: block; font-size: 12px; color: var(--ink-soft); margin-top: 8px; }
+.example { border: 1px solid var(--rule); border-radius: 4px; padding: 16px 20px; margin: 24px 0; }
+.example .label, .supp .label, .note .label {
+  font-size: 12px; font-weight: 700; letter-spacing: .1em; display: block; margin-bottom: 8px; }
+.example .label { color: var(--accent); }
+
+/* AI補足（supplement）— 色だけでなく罫線とラベルで区別する */
+.supp { border: 1px dashed var(--ink-soft); border-radius: 4px; padding: 14px 20px;
+        margin: 24px 0; background: var(--paper-tint); font-size: 15px; }
+.supp .label { color: var(--ink-soft); }
+.supp p:last-child { margin-bottom: 0; }
+
+/* 注意・落とし穴（橙）— 試験でよく落とすところ */
+.caution { border-left: 3px solid var(--caution); background: #fffbeb;
+           padding: 12px 20px; margin: 24px 0; }
+.caution .label { font-size: 12px; font-weight: 700; letter-spacing: .1em;
+                  color: var(--caution); display: block; margin-bottom: 6px; }
+.caution p:last-child { margin-bottom: 0; }
+.caution strong { background: none !important; color: var(--caution) !important; }
+
+/* 要確認（unresolved）— 隠さない */
+.note { border-left: 3px solid var(--alert); padding: 12px 20px; margin: 24px 0; background: #fdf6f4; }
+.note .label { color: var(--alert); }
+.note p:last-child { margin-bottom: 0; }
+.note strong { background: none !important; color: var(--alert) !important; }
+.supp strong { background: none !important; color: var(--ink) !important; }
+.unresolved { border-left: 3px solid var(--alert); background: #fdf6f4; padding: 10px 16px;
+              margin: 16px 0; font-size: 14px; color: var(--alert); display: block !important; }
+
+/* ===== Mermaid図 ===== */
+.diagram { margin: 32px 0; padding: 18px; border: 1px solid var(--rule); border-radius: 4px;
+           background: var(--paper); overflow-x: auto; text-align: center; }
+.diagram pre.mermaid { margin: 0; background: none; border: none; padding: 0; }
+.diagram svg { max-width: 100%; height: auto; }
+p.cap { margin: -24px 0 32px; padding: 0 4px; font-size: 12.5px; color: var(--ink-soft); text-align: center; }
+
+/* ===== 図 ===== */
+figure { margin: 32px 0; }
+figure img { max-width: 100%; display: block; margin: 0 auto; border: 1px solid var(--rule); cursor: zoom-in; }
+figcaption { font-size: 13px; color: var(--ink-soft); text-align: center; margin-top: 10px; }
+
+/* ===== 出典行 ===== */
+.src { font-size: 12.5px; color: var(--ink-soft); margin: 20px 0 40px;
+       padding-top: 8px; border-top: 1px dotted var(--rule); }
+.src a { color: var(--ink-soft); }
+.src a:hover { color: var(--accent); }
+
+/* ===== 演習 ===== */
+.exercise { border: 1px solid var(--rule); border-left: 3px solid var(--ink-soft);
+            border-radius: 4px; padding: 18px 22px; margin: 24px 0; }
+.exercise h3 { margin: 0 0 10px; font-size: 15px; }
+.exercise .origin { font-size: 12px; color: var(--ink-soft); font-weight: 400; margin-left: 8px; }
+.exercise.check { border-left-color: var(--accent); background: var(--paper-tint); }
+details { margin-top: 14px; }
+details summary { cursor: pointer; font-size: 13px; font-weight: 700; color: var(--ok);
+                  padding: 6px 0; list-style: none; }
+.exercise details[open] { background: #f0fdf4; border-left: 3px solid var(--ok);
+                          padding: 4px 16px 8px; border-radius: 3px; }
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: "▸ "; }
+details[open] summary::before { content: "▾ "; }
+
+/* 枠の中の枠は線を減らす（三重の額縁にしない） */
+.exercise .def, .exercise .caution, .exercise .note, .exercise .supp,
+.summary .def, .summary .caution, .summary .note, .summary .supp,
+.example .def, .example .supp, details .def, details .caution, details .supp {
+  border: none; border-left: 3px solid currentColor; border-radius: 0;
+  background: transparent; padding: 6px 0 6px 14px; margin: 14px 0;
+}
+.exercise .def, .summary .def, .example .def, details .def { color: var(--accent); }
+.exercise .caution, .summary .caution, details .caution { color: var(--caution); }
+.exercise .note, .summary .note { color: var(--alert); }
+.exercise .supp, .summary .supp, .example .supp, details .supp { color: var(--ink-soft); }
+.exercise .def p, .exercise .caution p, .exercise .note p, .exercise .supp p,
+details .def p, details .caution p, details .supp p { color: var(--ink); }
+
+/* ===== ランク（装飾ではなく情報） ===== */
+.rank { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em;
+        padding: 1px 7px; border-radius: 2px; margin-left: 10px; vertical-align: 2px; }
+.rank-s { background: var(--alert); color: #fff; }
+.rank-a { background: var(--accent); color: #fff; }
+.rank-b { background: #e2e5ea; color: var(--ink-soft); }
+.rank-u { background: #fff; color: var(--ink-soft); border: 1px solid var(--rule); }
+
+/* ===== 表・コード ===== */
+table { border-collapse: collapse; width: 100%; margin: 24px 0; font-size: 14px; }
+th, td { border-bottom: 1px solid var(--rule); padding: 9px 12px; text-align: left; vertical-align: top; }
+th { background: var(--accent); color: #fff; font-weight: 700; border-bottom: none; }
+tbody tr:nth-child(even) { background: var(--paper-tint); }
+td strong { background: none !important; }
+pre { background: var(--paper-tint); border: 1px solid var(--rule); border-radius: 4px;
+      padding: 14px 18px; overflow-x: auto; font-size: 13.5px; line-height: 1.7; }
+code { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: .92em;
+       background: var(--paper-tint); padding: 1px 5px; border-radius: 3px; }
+pre code { background: none; padding: 0; }
+
+/* ===== 用語集・付録 ===== */
+.glossary dt { font-weight: 700; margin-top: 16px; }
+.glossary dd { margin: 4px 0 0; }
+.glossary .ref { font-size: 12px; color: var(--ink-soft); }
+.appendix details { border: 1px solid var(--rule); border-radius: 4px; padding: 12px 18px; margin: 12px 0; }
+.appendix details summary { font-size: 14px; }
+.appendix .page { border-top: 1px solid var(--rule); padding-top: 16px; margin-top: 20px; }
+.appendix .page h4 { font-size: 13px; color: var(--ink-soft); margin: 0 0 8px; font-weight: 600; }
+.appendix .extract { font-size: 14px; }
+.appendix .conf { font-size: 11px; color: var(--ink-soft); }
+
+/* ===== 進捗・検索・モーダル ===== */
+#progress { position: fixed; bottom: 0; left: 0; height: 2px; background: var(--accent);
+            width: 0; z-index: 50; transition: width .1s linear; }
+mark.hl { background: #fdf3c4; color: inherit; padding: 0 1px; }
+#modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 999; place-items: center; }
+#modal.open { display: grid; }
+#modal img { max-width: 94vw; max-height: 90vh; background: #fff; }
+#modal-cap { color: #ccc; font-size: 13px; margin-top: 10px; text-align: center; }
+
+/* ===== レスポンシブ ===== */
+@media (max-width: 900px) {
+  .book { grid-template-columns: 1fr; }
+  nav.toc { position: static; height: auto; border-right: none;
+            border-bottom: 1px solid var(--rule); padding: 16px 20px; }
+  #tocToggle { display: block; width: 100%; padding: 8px; margin-bottom: 8px;
+               border: 1px solid var(--rule); border-radius: 4px; background: var(--paper);
+               font-size: 13px; cursor: pointer; text-align: left; }
+  nav.toc.collapsed #tocList { display: none; }
+  main { padding: 28px 20px 80px; max-width: none; }
+  h1.chapter { margin-top: 56px; }
+}
+@media print {
+  nav.toc, #progress, #modal { display: none !important; }
+  .book { display: block; }
+  main { max-width: none; padding: 0; }
+  h1.chapter { page-break-before: always; }
+  figure, .exercise, .def, .diagram { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<div class="book">
+
+<nav class="toc" id="sidebar">
+  <button id="tocToggle" aria-expanded="true">目次を開閉</button>
+  <input id="searchInput" type="search" placeholder="本文を検索（空白でAND）">
+  <div id="searchMeta" role="status"></div>
+  <p class="toc-title">目次</p>
+  <div id="tocList"></div>
+</nav>
+
+<main id="content">
+
+  <header class="cover">
+    <p class="subject">{{SUBJECT}}</p>
+    <p class="meta">{{TEACHER}} ／ {{TERM}}</p>
+    <p class="countdown" id="countdown" data-exam="{{EXAM_DATE}}"></p>
+  </header>
+
+  <section id="guide" class="chap">
+    <h1 class="chapter" style="margin-top:0;border-top:none;padding-top:0">
+      <span class="num">GUIDE</span>試験対策ガイド
+    </h1>
+
+    <h2 id="g-howto">この本の使い方</h2>
+    <p><strong>この本は、これ1冊で完結するように書かれている。</strong>
+       授業資料が「既知とする」で飛ばした前提知識は<a href="#ch0">第0章</a>に書いた。
+       導出も途中式を省いていない。教科書や他の資料を開かなくても読み通せる。</p>
+    <p>本文は授業資料を再構成して書いた解説であり、スライドをそのまま並べたものではない。
+       原資料は<a href="#appendix-a">付録A</a>に全ページ収録してあり、各節の末尾にある出典から
+       該当ページへ直接飛べる。記述に疑問を持ったときは原資料を確認すること。</p>
+    <p>破線で囲まれた「補足」は、理解を助けるために追加した説明であり、授業資料に直接は書かれていない。
+       赤い「要確認」は、資料が判読できなかった箇所か、資料間で記述が食い違う箇所である。
+       <strong>この本で唯一、自分で確認する必要がある箇所がここである。</strong></p>
+    <p>各章の末尾に「理解チェック」がある。読み終えたら必ず解くこと。
+       答えられなければ、その節に戻る。読んだ気になって試験に行くのを防ぐためにある。</p>
+
+    <h2 id="g-pred">出題予測</h2>
+    <table>
+      <thead><tr><th>ランク</th><th>概念</th><th>形式</th><th>根拠</th></tr></thead>
+      <tbody><!-- {{PREDICTION_ROWS}} --></tbody>
+    </table>
+
+    <h2 id="g-plan">学習プラン</h2>
+    <!-- {{STUDY_PLAN}} -->
+  </section>
+
+  <!-- {{CHAPTERS}} -->
+
+  <h1 class="chapter" id="glossary"><span class="num">GLOSSARY</span>用語集</h1>
+  <section class="chap">
+  <dl class="glossary">
+    <!-- {{GLOSSARY_ITEMS}} -->
+  </dl>
+  </section>
+
+  <h1 class="chapter" id="appendix-a"><span class="num">APPENDIX A</span>原資料</h1>
+  <p>授業資料の全ページを収録したもの。<strong>正本はページ画像である。</strong>
+     抽出テキストはPDFのテキスト抽出やOCRの結果であり、誤りを含みうる。
+     本文の記述に疑問を持ったときは、必ずページ画像を確認すること。</p>
+
+  <div class="appendix">
+    <!-- {{APPENDIX_LECTURES}} -->
+  </div>
+
+  <h1 class="chapter" id="appendix-b"><span class="num">APPENDIX B</span>過去問</h1>
+  <section class="chap">
+  <!-- {{PAST_EXAMS}} -->
+  </section>
+
+</main>
+</div>
+
+<div id="progress"></div>
+<div id="modal" aria-hidden="true">
+  <div style="text-align:center">
+    <img id="modal-img" src="" alt="">
+    <div id="modal-cap"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  'use strict';
+
+  /* ===== 目次（章 → 節の2階層） ===== */
+  function buildToc() {
+    var html = '';
+    document.querySelectorAll('h1.chapter[id], h2[id]').forEach(function (h) {
+      var isChap = h.tagName === 'H1';
+      var num = h.querySelector('.num');
+      var rank = h.querySelector('.rank');
+      var text = h.textContent;
+      if (num) text = text.replace(num.textContent, '');
+      if (rank) text = text.replace(rank.textContent, '');
+      // 目次はMathJaxを組版しない（未組版の見出しから作るため）ので、
+      // $...$ / $$...$$ の中身をそのまま出すと生のLaTeXソースが見えてしまう。
+      // バックスラッシュを含む本格的な数式は読めないコードにしかならないので削除し、
+      // (k,n) のようなバックスラッシュなしの単純な中身だけ $ を外してそのまま残す。
+      text = text.replace(/\$\$([^$]*)\$\$|\$([^$]*)\$/g, function (m, d, s) {
+        var inner = d !== undefined ? d : s;
+        return /\\/.test(inner) ? '' : inner;
+      });
+      text = text.replace(/\s+/g, ' ');
+      html += '<a class="' + (isChap ? 'chap' : 'sect') + '" href="#' + h.id + '">' +
+              text.trim() + '</a>';
+    });
+    document.getElementById('tocList').innerHTML = html;
+  }
+
+  /* ===== 現在位置のハイライト ===== */
+  function setupScrollSpy() {
+    var links = {};
+    document.querySelectorAll('#tocList a').forEach(function (a) {
+      links[decodeURIComponent(a.getAttribute('href').slice(1))] = a;
+    });
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        Object.keys(links).forEach(function (k) { links[k].classList.remove('current'); });
+        var link = links[e.target.id];
+        if (!link) return;
+        link.classList.add('current');
+        var nav = document.getElementById('sidebar');
+        if (nav.scrollHeight > nav.clientHeight) {
+          nav.scrollTo({ top: link.offsetTop - nav.clientHeight / 2, behavior: 'smooth' });
+        }
+      });
+    }, { rootMargin: '0px 0px -75% 0px', threshold: 0 });
+    document.querySelectorAll('h1.chapter[id], h2[id]').forEach(function (h) { obs.observe(h); });
+  }
+
+  /* ===== 進捗バー ===== */
+  function setupProgress() {
+    var bar = document.getElementById('progress');
+    function update() {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+
+  /* ===== 読了位置の復元（localStorage に統一） ===== */
+  function setupBookmark() {
+    var KEY = 'ssb_pos_' + location.pathname;
+    var saved = localStorage.getItem(KEY);
+    if (saved && !location.hash) window.scrollTo(0, parseInt(saved, 10));
+    var t = null;
+    window.addEventListener('scroll', function () {
+      clearTimeout(t);
+      t = setTimeout(function () { localStorage.setItem(KEY, String(window.scrollY)); }, 400);
+    }, { passive: true });
+  }
+
+  /* ===== カウントダウン ===== */
+  function setupCountdown() {
+    var el = document.getElementById('countdown');
+    if (!el) return;
+    var exam = el.dataset.exam;
+    if (!exam || exam.indexOf('{{') === 0) { el.style.display = 'none'; return; }
+    var d = new Date(exam);
+    if (isNaN(d)) { el.style.display = 'none'; return; }
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var days = Math.round((d - today) / 86400000);
+    el.textContent = days > 0 ? '試験まで あと ' + days + ' 日（' + exam + '）'
+                   : days === 0 ? '試験当日' : '試験日: ' + exam;
+  }
+
+  /* ===== 検索（AND・ハイライト） =====
+     入れ子の二重処理を避けるため、対象は「他の対象を含まない末端ブロック」だけにする。 */
+  var CANDIDATES = 'main p, main li, main dd, main dt, main td, main h2, main h3, main figcaption';
+  var EXCLUDE = ['SCRIPT', 'STYLE', 'MARK', 'BUTTON', 'INPUT'];
+
+  function searchTargets() {
+    var all = Array.prototype.slice.call(document.querySelectorAll(CANDIDATES));
+    return all.filter(function (el) { return !el.querySelector(CANDIDATES); });
+  }
+
+  function addHighlights(root, terms) {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (node) {
+        var tag = node.parentElement ? node.parentElement.tagName : '';
+        if (EXCLUDE.indexOf(tag) >= 0) return NodeFilter.FILTER_REJECT;
+        var text = node.nodeValue.toLowerCase();
+        return terms.some(function (t) { return text.indexOf(t) >= 0; })
+          ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function (node) {
+      var html = node.nodeValue.replace(/[&<>]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c];
+      });
+      terms.forEach(function (t) {
+        // 後方参照($1)は使わない。Skill引数の置換と衝突するため関数置換にする
+        var re = new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+        html = html.replace(re, function (m) { return '<mark class="hl">' + m + '</mark>'; });
+      });
+      var span = document.createElement('span');
+      span.className = 'hl-wrap';
+      span.innerHTML = html;
+      node.parentNode.replaceChild(span, node);
+    });
+  }
+
+  function removeHighlights() {
+    document.querySelectorAll('span.hl-wrap').forEach(function (s) {
+      var parent = s.parentNode;
+      parent.replaceChild(document.createTextNode(s.textContent), s);
+      parent.normalize();
+    });
+  }
+
+  var timer = null;
+  function runSearch() {
+    removeHighlights();
+    var terms = document.getElementById('searchInput').value
+                  .toLowerCase().trim().split(/\s+/).filter(Boolean);
+    var meta = document.getElementById('searchMeta');
+    if (!terms.length) { meta.textContent = ''; return; }
+    var hits = 0;
+    searchTargets().forEach(function (el) {
+      var text = el.textContent.toLowerCase();
+      if (!terms.every(function (t) { return text.indexOf(t) >= 0; })) return;
+      hits++;
+      addHighlights(el, terms);
+      // 折りたたみ内のヒットは開いて見せる
+      var d = el.closest('details');
+      while (d) { d.open = true; d = d.parentElement.closest('details'); }
+    });
+    meta.textContent = hits + ' 件';
+  }
+
+  function setupSearch() {
+    document.getElementById('searchInput').addEventListener('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(runSearch, 200);
+    });
+  }
+
+  /* ===== 図の拡大 ===== */
+  function setupModal() {
+    var modal = document.getElementById('modal');
+    var img = document.getElementById('modal-img');
+    var cap = document.getElementById('modal-cap');
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest('figure img');
+      if (!t) return;
+      img.src = t.src;
+      img.alt = t.alt || '';
+      var fc = t.parentElement.querySelector('figcaption');
+      cap.textContent = fc ? fc.textContent : '';
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+    });
+    function close() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      img.src = '';
+    }
+    modal.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  }
+
+  /* ===== 出典リンク → 付録の details を開く ===== */
+  function setupAppendixJump() {
+    function open() {
+      var id = decodeURIComponent(location.hash.slice(1));
+      if (!id) return;
+      var el = document.getElementById(id);
+      if (!el) return;
+      var d = el.closest('details');
+      while (d) { d.open = true; d = d.parentElement.closest('details'); }
+      el.scrollIntoView();
+    }
+    window.addEventListener('hashchange', open);
+    open();
+  }
+
+  /* ===== 印刷（CSSだけでは閉じた details は印刷されない） ===== */
+  function setupPrint() {
+    var opened = [];
+    window.addEventListener('beforeprint', function () {
+      opened = [];
+      document.querySelectorAll('details:not([open])').forEach(function (d) {
+        opened.push(d);
+        d.open = true;
+      });
+    });
+    window.addEventListener('afterprint', function () {
+      opened.forEach(function (d) { d.open = false; });
+      opened = [];
+    });
+  }
+
+  /* ===== モバイルの目次折りたたみ ===== */
+  function setupTocToggle() {
+    var nav = document.getElementById('sidebar');
+    var btn = document.getElementById('tocToggle');
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      nav.classList.add('collapsed');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+    btn.addEventListener('click', function () {
+      var collapsed = nav.classList.toggle('collapsed');
+      btn.setAttribute('aria-expanded', String(!collapsed));
+    });
+    document.getElementById('tocList').addEventListener('click', function (e) {
+      if (e.target.tagName === 'A' && window.matchMedia('(max-width: 900px)').matches) {
+        nav.classList.add('collapsed');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  /* ===== 数式の遅延組版（1692本を一括で組むと重いので、章が近づいたら組む） ===== */
+  function setupLazyMath() {
+    var chaps = document.querySelectorAll('section.chap');
+    if (!chaps.length || !window.MathJax) return;
+    var pending = 0;
+    function typeset(el) {
+      if (el.dataset.typeset) return;
+      el.dataset.typeset = '1';
+      pending++;
+      MathJax.startup.promise = MathJax.startup.promise
+        .then(function () { return MathJax.typesetPromise([el]); })
+        .then(function () { if (--pending === 0) document.body.classList.add('math-ready'); })
+        .catch(function (e) { console.error(e); });
+    }
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { typeset(e.target); obs.unobserve(e.target); }
+      });
+    }, { rootMargin: '800px 0px' });   // 画面の800px手前で先に組んでおく
+    chaps.forEach(function (c) { obs.observe(c); });
+
+    // 検索・目次リンクで飛ぶ先が未組版だと数式が生のままになるので、その場で組む
+    window.addEventListener('hashchange', function () {
+      var el = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      var c = el && el.closest('section.chap');
+      if (c) typeset(c);
+    });
+  }
+
+  function setupMermaid() {
+    if (!window.mermaid) return;
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { htmlLabels: true }, securityLevel: 'loose' });
+  }
+
+  buildToc();
+  setupMermaid();
+  setupLazyMath();
+  setupScrollSpy();
+  setupProgress();
+  setupBookmark();
+  setupCountdown();
+  setupSearch();
+  setupModal();
+  setupAppendixJump();
+  setupPrint();
+  setupTocToggle();
+});
+</script>
+</body>
+</html>
