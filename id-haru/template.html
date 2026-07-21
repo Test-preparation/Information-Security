@@ -582,9 +582,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function setupMermaid() {
     if (!window.mermaid) return;
-    // forceLegacyMathML: OS・ブラウザのMathML実装差による表示崩れを避け、KaTeXのCSSで統一して描画する
+    // legacyMathML系フラグは付けても外してもMermaid(v10.9.6)の出力はMathML直書きのまま変わらなかった。
+    // 素の \bmod だけがそのMathML出力で中身が空になる実バグがあるため、図側で \mod に置き換えて回避している。
     mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { htmlLabels: true },
-                          securityLevel: 'loose', legacyMathML: true, forceLegacyMathML: true });
+                          securityLevel: 'loose' });
   }
 
   buildToc();
